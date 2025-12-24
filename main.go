@@ -159,7 +159,7 @@ func Init() (*Player, *Terrain, error) {
 		X:       0,
 		Y:       0,
 		Health:  100,
-		Speed:   2,
+		Speed:   4,
 		Heading: 0,
 		image:   img,
 	}
@@ -192,6 +192,8 @@ func main() {
 		player,
 		terrain,
 	}
+
+	Tiles = InitTiles(WorldMap) // Slices are passed by value in GO
 
 	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)

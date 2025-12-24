@@ -13,7 +13,8 @@ const (
 	TileStone = 1
 	TileWater = 2
 
-	TileScale = 8
+	TileScale     = 8
+	TileWorldSize = TileSize * TileScale
 )
 
 const (
