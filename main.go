@@ -113,8 +113,6 @@ func (g *Game) PlayerHeading() error {
 func (g *Game) Update() error {
 	g.PlayerMovement()
 	g.PlayerHeading()
-
-	ebitenutil.DebugPrint(fmt.Sprintf("X: %f | Y: %f ", g.P.X, g.P.Y)) // FIX
 	return nil
 }
 
@@ -137,6 +135,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// Player
 	g.DrawPlayer(screen)
+
+	debug := fmt.Sprintf(
+		"Player X: %.1f\nPlayer Y: %.1f",
+		g.P.X,
+		g.P.Y,
+	)
+	ebitenutil.DebugPrintAt(screen, debug, 10, 10)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -151,8 +156,8 @@ func Init() (*Player, *Terrain, error) {
 	}
 
 	p := Player{
-		X:       float64(WorldWidth) / 2,
-		Y:       float64(WorldHeight) / 2,
+		X:       0,
+		Y:       0,
 		Health:  100,
 		Speed:   2,
 		Heading: 0,

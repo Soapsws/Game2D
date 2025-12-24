@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -19,8 +21,8 @@ func (p *Player) Move(xDir, yDir float64) error {
 
 	// new clamping so player never sees outside of the mAAp
 
-	// p.X = math.Max(HalfW, math.Min(p.X, float64(WorldWidth)-HalfW))
-	// p.Y = math.Max(HalfH, math.Min(p.Y, float64(WorldHeight)-HalfH))
+	p.X = math.Max(-1*WorldWidth/2, math.Min(WorldWidth/2, p.X))
+	p.Y = math.Max(-1*WorldHeight/2, math.Min(p.Y, WorldHeight/2))
 
 	return nil
 }
