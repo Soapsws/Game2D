@@ -20,8 +20,8 @@ type Game struct {
 var WorldMap = [][]int{
 	{0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0},
-	{0, 0, 1, 1, 1, 0, 0, 2, 2, 1, 1, 0, 1, 0, 0, 0},
-	{2, 2, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0},
+	{0, 0, 1, 1, 1, 0, 0, 2, 2, 1, 0, 0, 1, 0, 0, 0},
+	{2, 2, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0},
 	{2, 2, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{2, 2, 2, 2, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -94,7 +94,8 @@ func (g *Game) PlayerMovement() {
 		dy /= math.Sqrt(2)
 	}
 
-	g.P.Move(dx, dy)
+	g.P.Move(dx, 0)
+	g.P.Move(0, dy)
 }
 
 func (g *Game) PlayerHeading() error {
@@ -137,9 +138,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.DrawPlayer(screen)
 
 	debug := fmt.Sprintf(
-		"Player X: %.1f\nPlayer Y: %.1f",
+		"Player X: %.1f | Player Y: %.1f \nTile[%d,%d]",
 		g.P.X,
 		g.P.Y,
+		TilePosition(g.P).IDX,
+		TilePosition(g.P).IDY,
 	)
 	ebitenutil.DebugPrintAt(screen, debug, 10, 10)
 }

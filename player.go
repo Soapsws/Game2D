@@ -16,13 +16,25 @@ type Player struct {
 }
 
 func (p *Player) Move(xDir, yDir float64) error {
-	p.X += p.Speed * xDir
-	p.Y += p.Speed * yDir
+	var speed float64
+	if TilePosition(p).Type == "Water" {
+		speed = float64(p.Speed) * (0.7)
+	} else {
+		speed = p.Speed
+	}
 
-	// new clamping so player never sees outside of the mAAp
+	p.X += speed * xDir
+	p.Y += speed * yDir
+
+	// new clamping so player never sees outside of the map
 
 	p.X = math.Max(-1*WorldWidth/2, math.Min(WorldWidth/2-1, p.X))
 	p.Y = math.Max(-1*WorldHeight/2, math.Min(p.Y, WorldHeight/2-1))
+
+	if TilePosition(p).Type == "Stone" {
+		p.X -= speed * xDir
+		p.Y -= speed * yDir
+	}
 
 	return nil
 }
