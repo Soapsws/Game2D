@@ -14,7 +14,12 @@ const (
 	TileWater = 2
 
 	TileScale     = 8
-	TileWorldSize = TileSize * TileScale
+	TileWorldSize = TileSize * TileScale // 256 px per tile
+)
+
+const (
+	EntityScale     = 2
+	EntityWorldSize = TileSize * EntityScale
 )
 
 const (

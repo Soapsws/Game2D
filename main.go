@@ -9,11 +9,12 @@ import (
 
 	"errors"
 	"math"
+	"math/rand"
 )
 
 type Game struct {
 	P *Player
-
+	E []Entity
 	T *Terrain
 }
 
@@ -36,18 +37,53 @@ var WorldMap = [][]int{
 	{0, 0, 0, 2, 2, 2, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
 }
 
+func (g *Game) DrawEntity(screen *ebiten.Image, ent Entity) {
+	op := ebiten.DrawImageOptions{}
+	bounds := float64(ent.image.Bounds().Dx())
+	scale := float64(EntityWorldSize) / bounds
+	op.GeoM.Scale(scale, scale)
+
+	// Initialized in coordinate-space so translation isn't necessary
+	op.GeoM.Translate(
+		float64(ent.X),
+		float64(ent.Y),
+	)
+
+	op.GeoM.Translate(
+		-float64(len(WorldMap))/2*TileWorldSize,
+		-float64(len(WorldMap))/2*TileWorldSize,
+	)
+
+	op.GeoM.Translate(
+		-EntityWorldSize/2,
+		-EntityWorldSize/2,
+	)
+
+	// Map-based movement
+	op.GeoM.Translate(
+		-1*(g.P.X)+(HalfW),
+		-1*(g.P.Y)+(HalfH),
+	)
+
+	screen.DrawImage(ent.image, &op)
+}
+
 func (g *Game) DrawTile(screen *ebiten.Image, tile *ebiten.Image, tileX, tileY int) {
 	op := ebiten.DrawImageOptions{}
-	scale := float64(TileSize) / float64(tile.Bounds().Dx())
-	op.GeoM.Scale(scale, scale)
-	op.GeoM.Scale(TileScale, TileScale) // Rescale
+	bounds := float64(tile.Bounds().Dx())
+	op.GeoM.Scale(float64(TileWorldSize)/bounds, float64(TileWorldSize)/bounds)
+
+	// Initialized in tile-space so have to be manually translated
+	// See terrain.go for tile-space info
 	op.GeoM.Translate(
 		float64(tileX*TileSize),
 		float64(tileY*TileSize),
 	)
+
+	// centered by moving up-left
 	op.GeoM.Translate(
-		-1*float64(len(WorldMap))/2*(TileScale*TileSize),
-		-1*float64(len(WorldMap))/2*(TileScale*TileSize),
+		-1*float64(len(WorldMap))/2*TileWorldSize,
+		-1*float64(len(WorldMap))/2*TileWorldSize,
 	)
 
 	// Map-based movement
@@ -134,6 +170,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 
+	// Entities
+	for i := 0; i < len(g.E); i++ {
+		g.DrawEntity(screen, g.E[i])
+	}
+
 	// Player
 	g.DrawPlayer(screen)
 
@@ -151,11 +192,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 	return ScreenWidth, ScreenHeight
 }
 
-func Init() (*Player, *Terrain, error) {
+func Init() (*Player, *[]Entity, *Terrain, error) {
 	img, _, err := ebitenutil.NewImageFromFile("Char_Game.png")
 
 	if err != nil {
-		return nil, nil, errors.New("Bad image")
+		return nil, nil, nil, errors.New("Bad image")
 	}
 
 	p := Player{
@@ -165,6 +206,20 @@ func Init() (*Player, *Terrain, error) {
 		Speed:   4,
 		Heading: 0,
 		image:   img,
+	}
+
+	NumEnts := 100
+	e := make([]Entity, NumEnts)
+	pts := RandomCoordGenerator(NumEnts) // how many entities?
+	re, _, err := ebitenutil.NewImageFromFile("RockEntityTransparent.png")
+	be, _, err := ebitenutil.NewImageFromFile("BushEntityTransparent.png")
+	for i := 0; i < NumEnts; i++ {
+		randomPick := rand.Intn(100)
+		if randomPick >= 50 {
+			e[i] = Entity{pts[i].X, pts[i].Y, "Rock", re}
+		} else {
+			e[i] = Entity{pts[i].X, pts[i].Y, "Bush", be}
+		}
 	}
 
 	gt, _, err := ebitenutil.NewImageFromFile("GrassTile.png")
@@ -180,19 +235,20 @@ func Init() (*Player, *Terrain, error) {
 		MapY: 0,
 	}
 
-	return &p, &t, nil
+	return &p, &e, &t, nil
 }
 
 func main() {
 	ebiten.SetWindowSize(WindowX, WindowY)
 	ebiten.SetWindowTitle("2D Game")
-	player, terrain, err := Init()
+	player, entities, terrain, err := Init()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	game := Game{
 		player,
+		*entities,
 		terrain,
 	}
 
