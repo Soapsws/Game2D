@@ -193,7 +193,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func Init() (*Player, *[]Entity, *Terrain, error) {
-	img, _, err := ebitenutil.NewImageFromFile("Char_Game.png")
+	img, _, err := ebitenutil.NewImageFromFile("images/Char_Game.png")
 
 	if err != nil {
 		return nil, nil, nil, errors.New("Bad image")
@@ -211,8 +211,8 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 	NumEnts := 100
 	e := make([]Entity, NumEnts)
 	pts := RandomCoordGenerator(NumEnts) // how many entities?
-	re, _, err := ebitenutil.NewImageFromFile("RockEntityTransparent.png")
-	be, _, err := ebitenutil.NewImageFromFile("BushEntityTransparent.png")
+	re, _, err := ebitenutil.NewImageFromFile("images/RockEntityTransparent.png")
+	be, _, err := ebitenutil.NewImageFromFile("images/BushEntityTransparent.png")
 	for i := 0; i < NumEnts; i++ {
 		randomPick := rand.Intn(100)
 		if randomPick >= 50 {
@@ -222,9 +222,9 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 		}
 	}
 
-	gt, _, err := ebitenutil.NewImageFromFile("GrassTile.png")
-	st, _, err := ebitenutil.NewImageFromFile("StoneTile.png")
-	wt, _, err := ebitenutil.NewImageFromFile("WaterTile.png")
+	gt, _, err := ebitenutil.NewImageFromFile("images/GrassTile.png")
+	st, _, err := ebitenutil.NewImageFromFile("images/StoneTile.png")
+	wt, _, err := ebitenutil.NewImageFromFile("images/WaterTile.png")
 
 	t := Terrain{
 		Grass: gt,
