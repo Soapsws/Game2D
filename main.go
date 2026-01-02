@@ -37,6 +37,9 @@ var WorldMap = [][]int{
 	{0, 0, 0, 2, 2, 2, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
 }
 
+// Universal Rendering Rule:
+// Sprite-local transforms -> world placement -> camera transform
+
 func (g *Game) DrawEntity(screen *ebiten.Image, ent Entity) {
 	op := ebiten.DrawImageOptions{}
 	bounds := float64(ent.image.Bounds().Dx())
@@ -44,22 +47,20 @@ func (g *Game) DrawEntity(screen *ebiten.Image, ent Entity) {
 	op.GeoM.Scale(scale, scale)
 
 	// Initialized in coordinate-space so translation isn't necessary
+
+	// Stage 1
 	op.GeoM.Translate(
 		float64(ent.X),
 		float64(ent.Y),
 	)
 
-	op.GeoM.Translate(
-		-float64(len(WorldMap))/2*TileWorldSize,
-		-float64(len(WorldMap))/2*TileWorldSize,
-	)
-
+	// Stage 2
 	op.GeoM.Translate(
 		-EntityWorldSize/2,
 		-EntityWorldSize/2,
 	)
 
-	// Map-based movement
+	// Stage 3
 	op.GeoM.Translate(
 		-1*(g.P.X)+(HalfW),
 		-1*(g.P.Y)+(HalfH),
@@ -71,22 +72,25 @@ func (g *Game) DrawEntity(screen *ebiten.Image, ent Entity) {
 func (g *Game) DrawTile(screen *ebiten.Image, tile *ebiten.Image, tileX, tileY int) {
 	op := ebiten.DrawImageOptions{}
 	bounds := float64(tile.Bounds().Dx())
-	op.GeoM.Scale(float64(TileWorldSize)/bounds, float64(TileWorldSize)/bounds)
+	scale := float64(TileWorldSize) / bounds
+	op.GeoM.Scale(scale, scale)
 
 	// Initialized in tile-space so have to be manually translated
 	// See terrain.go for tile-space info
+
+	// Stage 1
 	op.GeoM.Translate(
 		float64(tileX*TileSize),
 		float64(tileY*TileSize),
 	)
 
-	// centered by moving up-left
+	// Stage 2
 	op.GeoM.Translate(
 		-1*float64(len(WorldMap))/2*TileWorldSize,
 		-1*float64(len(WorldMap))/2*TileWorldSize,
 	)
 
-	// Map-based movement
+	// Stage 3
 	op.GeoM.Translate(
 		-1*(g.P.X)+(HalfW),
 		-1*(g.P.Y)+(HalfH),
@@ -95,16 +99,18 @@ func (g *Game) DrawTile(screen *ebiten.Image, tile *ebiten.Image, tileX, tileY i
 	screen.DrawImage(tile, &op)
 }
 
-func (g *Game) DrawPlayer(screen *ebiten.Image) {
-	op := ebiten.DrawImageOptions{}   // Essentially creating an image transformation pipeline
-	size := g.P.image.Bounds().Size() // New non-deprecated version
-	w := size.X
-	h := size.Y
+func (g *Game) DrawPlayer(screen *ebiten.Image, player *ebiten.Image) {
+	op := ebiten.DrawImageOptions{} // Essentially creating an image transformation pipeline
+	bounds := float64(player.Bounds().Dx())
+	scale := float64(PlayerWorldSize) / bounds
+	w := player.Bounds().Dx()
+	h := player.Bounds().Dy()
 
+	// Place-specific pipeline: centering before scaling
 	op.GeoM.Translate(-float64(w)/2, -float64(h)/2) // Centers the sprite - super important!
-	op.GeoM.Scale(PlayerScale, PlayerScale)         // Size img down - NOTE ORDER OF TRANSFORMS
-	op.GeoM.Rotate(g.P.Heading)
+	op.GeoM.Scale(scale, scale)
 
+	op.GeoM.Rotate(g.P.Heading)
 	op.GeoM.Translate(float64(ScreenWidth)/2, float64(ScreenHeight)/2)
 
 	screen.DrawImage(g.P.image, &op)
@@ -130,8 +136,8 @@ func (g *Game) PlayerMovement() {
 		dy /= math.Sqrt(2)
 	}
 
-	g.P.Move(dx, 0)
-	g.P.Move(0, dy)
+	g.P.Move(dx, 0, g)
+	g.P.Move(0, dy, g)
 }
 
 func (g *Game) PlayerHeading() error {
@@ -176,7 +182,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// Player
-	g.DrawPlayer(screen)
+	g.DrawPlayer(screen, g.P.image)
 
 	debug := fmt.Sprintf(
 		"Player X: %.1f | Player Y: %.1f \nTile[%d,%d]",

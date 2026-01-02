@@ -1,9 +1,10 @@
 package main
 
 const (
-	WindowX     = 960
-	WindowY     = 720
-	PlayerScale = 0.1
+	WindowX         = 960
+	WindowY         = 720
+	PlayerScale     = 1.7
+	PlayerWorldSize = TileSize * PlayerScale
 
 	ScreenWidth  = 720
 	ScreenHeight = 540

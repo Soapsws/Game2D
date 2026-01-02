@@ -15,7 +15,7 @@ type Player struct {
 	image *ebiten.Image
 }
 
-func (p *Player) Move(xDir, yDir float64) error {
+func (p *Player) Move(xDir, yDir float64, g *Game) error {
 	var speed float64
 	if TilePosition(p).Type == "Water" {
 		speed = float64(p.Speed) * (0.7)
@@ -34,9 +34,23 @@ func (p *Player) Move(xDir, yDir float64) error {
 	if TilePosition(p).Type == "Stone" {
 		p.X -= speed * xDir
 		p.Y -= speed * yDir
+	} else if p.TouchingEntity(g) {
+		p.X -= speed * xDir
+		p.Y -= speed * yDir
 	}
 
 	return nil
+}
+
+func (p *Player) TouchingEntity(g *Game) bool {
+	for _, e := range g.E {
+		b := CollisionDetectorCircle(p.X, p.Y, e.X, e.Y,
+			float64(PlayerWorldSize)/2, EntityWorldSize/2)
+		if b {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *Player) Rotate(angle float64) {
