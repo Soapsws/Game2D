@@ -34,23 +34,40 @@ func (p *Player) Move(xDir, yDir float64, g *Game) error {
 	if TilePosition(p).Type == "Stone" {
 		p.X -= speed * xDir
 		p.Y -= speed * yDir
-	} else if p.TouchingEntity(g) {
-		p.X -= speed * xDir
-		p.Y -= speed * yDir
+	} else {
+		// Circle collision smooth physics (copied)
+		if ent, hit := p.TouchingEntity(g); hit {
+			dx := p.X - ent.X
+			dy := p.Y - ent.Y
+
+			dist := math.Sqrt(dx*dx + dy*dy)
+			if dist == 0 {
+				return nil
+			}
+
+			overlap := (PlayerWorldSize/2 + EntityWorldSize/2) - dist
+			if overlap > 0 {
+				nx := dx / dist
+				ny := dy / dist
+
+				p.X += nx * overlap
+				p.Y += ny * overlap
+			}
+		}
 	}
 
 	return nil
 }
 
-func (p *Player) TouchingEntity(g *Game) bool {
+func (p *Player) TouchingEntity(g *Game) (Entity, bool) {
 	for _, e := range g.E {
 		b := CollisionDetectorCircle(p.X, p.Y, e.X, e.Y,
 			float64(PlayerWorldSize)/2, EntityWorldSize/2)
 		if b {
-			return true
+			return e, true
 		}
 	}
-	return false
+	return Entity{-1, -1, "", nil}, false
 }
 
 func (p *Player) Rotate(angle float64) {
