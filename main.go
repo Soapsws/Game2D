@@ -174,7 +174,9 @@ func (g *Game) PlayerHeading() error {
 func (g *Game) Update() error {
 	g.PlayerMovement()
 	g.PlayerHeading()
+	g.P.UpdateMousePos()
 	g.P.CheckInteractableZone(g)
+	g.P.ScanInteractable(g)
 	return nil
 }
 
@@ -204,11 +206,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.DrawPlayer(screen, g.P.image, g.P.zoneImage)
 
 	debug := fmt.Sprintf(
-		"Player X: %.1f | Player Y: %.1f \nTile[%d,%d]",
+		"Player X: %.1f | Player Y: %.1f \nTile[%d,%d]\nMouse X: %.1f | Mouse Y: %.1f",
 		g.P.X,
 		g.P.Y,
 		TilePosition(g.P).IDX,
 		TilePosition(g.P).IDY,
+		g.P.MouseX,
+		g.P.MouseY,
 	)
 	ebitenutil.DebugPrintAt(screen, debug, 10, 10)
 }
@@ -232,6 +236,8 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 		Speed:          4,
 		Heading:        0,
 		DisplayingZone: false,
+		MouseX:         0,
+		MouseY:         0,
 		image:          img,
 		zoneImage:      zoneImg,
 	}

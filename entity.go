@@ -1,6 +1,10 @@
 package main
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"fmt"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Entity struct {
 	X, Y         float64
@@ -13,8 +17,5 @@ type Entity struct {
 // Add moving entities separately
 
 func (e *Entity) Interact() {
-	if e.Interactable == false {
-		return
-	}
-
+	fmt.Println("Collision works")
 }

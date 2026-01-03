@@ -63,3 +63,9 @@ func CollisionDetectorHybrid(cx, cy, r, bx, by, hw, hh float64) bool {
 func DistanceCalculator(x1, y1, x2, y2, threshold float64) bool {
 	return math.Sqrt(((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))) <= threshold
 }
+
+func ContainsPointCircle(bodyX, bodyY, bodyRadius, targetX, targetY float64) bool {
+	dx := math.Abs(targetX - bodyX)
+	dy := math.Abs(targetY - bodyY)
+	return math.Sqrt((dx*dx)+(dy*dy)) <= bodyRadius
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -13,6 +14,8 @@ type Player struct {
 	Heading float64
 
 	DisplayingZone bool
+	MouseX         float64
+	MouseY         float64
 
 	image     *ebiten.Image
 	zoneImage *ebiten.Image
@@ -63,21 +66,32 @@ func (p *Player) Move(xDir, yDir float64, g *Game) error {
 }
 
 func (p *Player) CheckInteractableZone(g *Game) {
-	if ebiten.IsKeyPressed(ebiten.KeyShift) {
-		p.DisplayingZone = true
-	} else {
-		p.DisplayingZone = false
-	}
+	p.DisplayingZone = ebiten.IsKeyPressed(ebiten.KeyShift)
 
-	for _, e := range g.E {
-		if DistanceCalculator(p.X, e.X, p.Y, e.Y, 200) {
-			e.Interactable = true
+	// Using slice references to access pointer
+	for i := range g.E {
+		g.E[i].Interactable = false
+		if DistanceCalculator(p.X, p.Y, g.E[i].X, g.E[i].Y, 200) {
+			g.E[i].Interactable = true
+			fmt.Println("True")
 		}
 	}
 }
 
+func (p *Player) UpdateMousePos() {
+	mouseX, mouseY := ebiten.CursorPosition()
+	// Adjusting for coordinate space
+	p.MouseX = float64(mouseX) - HalfW + p.X
+	p.MouseY = float64(mouseY) - HalfH + p.Y
+}
+
 func (p *Player) ScanInteractable(g *Game) {
-	// mouseX, mouseY := ebiten.CursorPosition()
+	for i := range g.E {
+		if g.E[i].Interactable && ContainsPointCircle(g.E[i].X, g.E[i].Y, EntityWorldSize/2, p.MouseX, p.MouseY) {
+			g.E[i].Interact()
+			break
+		}
+	}
 }
 
 func (p *Player) TouchingEntity(g *Game) (Entity, bool) {
