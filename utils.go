@@ -22,12 +22,21 @@ type Point struct {
 
 func RandomCoordGenerator(n int) []Point {
 	coords := make([]Point, n)
-	for i := 0; i < n; i++ {
-		x := rand.Intn(4096)
-		y := rand.Intn(4096)
-		// s := fmt.Sprintf("Entity Coord: %d, %d", x-2048, y-2048)
-		// fmt.Println(s)
-		coords[i] = Point{float64(x) - 2048, float64(y) - 2048}
+	i := 0
+	for i < n {
+		x := rand.Intn(4096) - 2048
+		y := rand.Intn(4096) - 2048
+		bc := 0
+		if x < 100 && x > -100 {
+			bc += 1
+		}
+		if y < 100 && y > -100 {
+			bc += 1
+		}
+		if bc < 2 {
+			coords[i] = Point{float64(x), float64(y)}
+			i++
+		}
 	}
 	return coords
 }
@@ -49,4 +58,8 @@ func CollisionDetectorHybrid(cx, cy, r, bx, by, hw, hh float64) bool {
 	dy := cy - closestY
 
 	return dx*dx+dy*dy <= r*r
+}
+
+func DistanceCalculator(x1, y1, x2, y2, threshold float64) bool {
+	return math.Sqrt(((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))) <= threshold
 }

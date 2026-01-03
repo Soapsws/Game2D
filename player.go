@@ -59,6 +59,14 @@ func (p *Player) Move(xDir, yDir float64, g *Game) error {
 	return nil
 }
 
+func (p *Player) CheckInteractableZone(g *Game) {
+	for _, e := range g.E {
+		if DistanceCalculator(p.X, e.X, p.Y, e.Y, 200) {
+			e.Interactable = true
+		}
+	}
+}
+
 func (p *Player) TouchingEntity(g *Game) (Entity, bool) {
 	for _, e := range g.E {
 		b := CollisionDetectorCircle(p.X, p.Y, e.X, e.Y,
@@ -67,7 +75,7 @@ func (p *Player) TouchingEntity(g *Game) (Entity, bool) {
 			return e, true
 		}
 	}
-	return Entity{-1, -1, "", nil}, false
+	return Entity{-1, -1, "", nil, false}, false
 }
 
 func (p *Player) Rotate(angle float64) {

@@ -3,9 +3,10 @@ package main
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Entity struct {
-	X, Y  float64
-	Type  string
-	image *ebiten.Image
+	X, Y         float64
+	Type         string
+	image        *ebiten.Image
+	Interactable bool
 }
 
 // Possible non-moving entities: rocks, trees/bushes

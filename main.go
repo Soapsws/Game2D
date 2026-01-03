@@ -156,6 +156,7 @@ func (g *Game) PlayerHeading() error {
 func (g *Game) Update() error {
 	g.PlayerMovement()
 	g.PlayerHeading()
+	g.P.CheckInteractableZone(g)
 	return nil
 }
 
@@ -222,9 +223,9 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 	for i := 0; i < NumEnts; i++ {
 		randomPick := rand.Intn(100)
 		if randomPick >= 50 {
-			e[i] = Entity{pts[i].X, pts[i].Y, "Rock", re}
+			e[i] = Entity{pts[i].X, pts[i].Y, "Rock", re, false}
 		} else {
-			e[i] = Entity{pts[i].X, pts[i].Y, "Bush", be}
+			e[i] = Entity{pts[i].X, pts[i].Y, "Bush", be, false}
 		}
 	}
 
