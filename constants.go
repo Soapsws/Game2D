@@ -5,6 +5,7 @@ const (
 	WindowY         = 720
 	PlayerScale     = 1.7
 	PlayerWorldSize = TileSize * PlayerScale
+	ZoneWorldSize   = 400
 
 	ScreenWidth  = 720
 	ScreenHeight = 540

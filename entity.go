@@ -11,3 +11,10 @@ type Entity struct {
 
 // Possible non-moving entities: rocks, trees/bushes
 // Add moving entities separately
+
+func (e *Entity) Interact() {
+	if e.Interactable == false {
+		return
+	}
+
+}

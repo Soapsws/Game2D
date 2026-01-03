@@ -12,7 +12,10 @@ type Player struct {
 	Speed   float64
 	Heading float64
 
-	image *ebiten.Image
+	DisplayingZone bool
+
+	image     *ebiten.Image
+	zoneImage *ebiten.Image
 }
 
 func (p *Player) Move(xDir, yDir float64, g *Game) error {
@@ -60,11 +63,21 @@ func (p *Player) Move(xDir, yDir float64, g *Game) error {
 }
 
 func (p *Player) CheckInteractableZone(g *Game) {
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		p.DisplayingZone = true
+	} else {
+		p.DisplayingZone = false
+	}
+
 	for _, e := range g.E {
 		if DistanceCalculator(p.X, e.X, p.Y, e.Y, 200) {
 			e.Interactable = true
 		}
 	}
+}
+
+func (p *Player) ScanInteractable(g *Game) {
+	// mouseX, mouseY := ebiten.CursorPosition()
 }
 
 func (p *Player) TouchingEntity(g *Game) (Entity, bool) {

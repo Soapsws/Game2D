@@ -78,6 +78,8 @@ func (g *Game) DrawTile(screen *ebiten.Image, tile *ebiten.Image, tileX, tileY i
 	// Initialized in tile-space so have to be manually translated
 	// See terrain.go for tile-space info
 
+	// 256 =
+
 	// Stage 1
 	op.GeoM.Translate(
 		float64(tileX*TileSize),
@@ -99,21 +101,37 @@ func (g *Game) DrawTile(screen *ebiten.Image, tile *ebiten.Image, tileX, tileY i
 	screen.DrawImage(tile, &op)
 }
 
-func (g *Game) DrawPlayer(screen *ebiten.Image, player *ebiten.Image) {
-	op := ebiten.DrawImageOptions{} // Essentially creating an image transformation pipeline
+func (g *Game) DrawPlayer(screen *ebiten.Image, player *ebiten.Image, zone *ebiten.Image) {
+	op := ebiten.DrawImageOptions{}
+	oz := ebiten.DrawImageOptions{}
+
 	bounds := float64(player.Bounds().Dx())
 	scale := float64(PlayerWorldSize) / bounds
 	w := player.Bounds().Dx()
 	h := player.Bounds().Dy()
 
+	boundsz := float64(zone.Bounds().Dx())
+	scalez := float64(ZoneWorldSize / boundsz)
+	wz := zone.Bounds().Dx()
+	hz := zone.Bounds().Dy()
+
 	// Place-specific pipeline: centering before scaling
 	op.GeoM.Translate(-float64(w)/2, -float64(h)/2) // Centers the sprite - super important!
 	op.GeoM.Scale(scale, scale)
 
+	oz.GeoM.Translate(-float64(wz)/2, -float64(hz)/2)
+	oz.GeoM.Scale(scalez, scalez)
+
 	op.GeoM.Rotate(g.P.Heading)
 	op.GeoM.Translate(float64(ScreenWidth)/2, float64(ScreenHeight)/2)
 
+	oz.GeoM.Translate(float64(ScreenWidth)/2, float64(ScreenHeight)/2)
+
 	screen.DrawImage(g.P.image, &op)
+
+	if g.P.DisplayingZone {
+		screen.DrawImage(g.P.zoneImage, &oz)
+	}
 }
 
 func (g *Game) PlayerMovement() {
@@ -182,8 +200,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.DrawEntity(screen, g.E[i])
 	}
 
-	// Player
-	g.DrawPlayer(screen, g.P.image)
+	// Player + Interactable Zone
+	g.DrawPlayer(screen, g.P.image, g.P.zoneImage)
 
 	debug := fmt.Sprintf(
 		"Player X: %.1f | Player Y: %.1f \nTile[%d,%d]",
@@ -201,18 +219,21 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 func Init() (*Player, *[]Entity, *Terrain, error) {
 	img, _, err := ebitenutil.NewImageFromFile("images/Char_Game.png")
+	zoneImg, _, err := ebitenutil.NewImageFromFile("images/InteractableZone.png")
 
 	if err != nil {
 		return nil, nil, nil, errors.New("Bad image")
 	}
 
 	p := Player{
-		X:       0,
-		Y:       0,
-		Health:  100,
-		Speed:   4,
-		Heading: 0,
-		image:   img,
+		X:              0,
+		Y:              0,
+		Health:         100,
+		Speed:          4,
+		Heading:        0,
+		DisplayingZone: false,
+		image:          img,
+		zoneImage:      zoneImg,
 	}
 
 	NumEnts := 100
