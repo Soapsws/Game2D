@@ -176,7 +176,9 @@ func (g *Game) Update() error {
 	g.PlayerHeading()
 	g.P.UpdateMousePos()
 	g.P.CheckInteractableZone(g)
-	g.P.ScanInteractable(g)
+	if g.P.InteractCooldown() {
+		g.P.ScanInteractable(g)
+	}
 	return nil
 }
 
@@ -238,9 +240,12 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 		DisplayingZone: false,
 		MouseX:         0,
 		MouseY:         0,
+		Damage:         10,
 		image:          img,
 		zoneImage:      zoneImg,
 	}
+
+	p.TimeInit()
 
 	NumEnts := 100
 	e := make([]Entity, NumEnts)
@@ -250,9 +255,9 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 	for i := 0; i < NumEnts; i++ {
 		randomPick := rand.Intn(100)
 		if randomPick >= 50 {
-			e[i] = Entity{pts[i].X, pts[i].Y, "Rock", re, false}
+			e[i] = Entity{pts[i].X, pts[i].Y, "Rock", re, false, 80}
 		} else {
-			e[i] = Entity{pts[i].X, pts[i].Y, "Bush", be, false}
+			e[i] = Entity{pts[i].X, pts[i].Y, "Bush", be, false, 40}
 		}
 	}
 

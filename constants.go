@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 const (
 	WindowX         = 960
 	WindowY         = 720
@@ -34,3 +36,5 @@ const (
 	HalfW = float64(ScreenWidth) / 2
 	HalfH = float64(ScreenHeight) / 2
 )
+
+const PlayerInteractCooldown = 500 * time.Millisecond

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -17,8 +17,20 @@ type Player struct {
 	MouseX         float64
 	MouseY         float64
 
+	Damage int32
+
+	PlayerTimestamp time.Time
+
 	image     *ebiten.Image
 	zoneImage *ebiten.Image
+}
+
+func (p *Player) TimeInit() {
+	p.PlayerTimestamp = time.Now()
+}
+
+func (p *Player) InteractCooldown() bool {
+	return time.Since(p.PlayerTimestamp) >= PlayerInteractCooldown
 }
 
 func (p *Player) Move(xDir, yDir float64, g *Game) error {
@@ -73,7 +85,7 @@ func (p *Player) CheckInteractableZone(g *Game) {
 		g.E[i].Interactable = false
 		if DistanceCalculator(p.X, p.Y, g.E[i].X, g.E[i].Y, 200) {
 			g.E[i].Interactable = true
-			fmt.Println("True")
+			// fmt.Println("True")
 		}
 	}
 }
@@ -86,11 +98,23 @@ func (p *Player) UpdateMousePos() {
 }
 
 func (p *Player) ScanInteractable(g *Game) {
+	interacted := false
 	for i := range g.E {
 		if g.E[i].Interactable && ContainsPointCircle(g.E[i].X, g.E[i].Y, EntityWorldSize/2, p.MouseX, p.MouseY) {
-			g.E[i].Interact()
-			break
+			if ebiten.IsKeyPressed(ebiten.KeyE) {
+				g.E[i].Interact(p, true)
+				interacted = true
+				break
+			} else if ebiten.IsKeyPressed(ebiten.KeyF) {
+				g.E[i].Interact(p, false)
+				interacted = true
+				break
+			}
 		}
+	}
+	if interacted {
+		now := time.Now()
+		p.PlayerTimestamp = now
 	}
 }
 
@@ -102,7 +126,7 @@ func (p *Player) TouchingEntity(g *Game) (Entity, bool) {
 			return e, true
 		}
 	}
-	return Entity{-1, -1, "", nil, false}, false
+	return Entity{-1, -1, "", nil, false, -1}, false
 }
 
 func (p *Player) Rotate(angle float64) {
