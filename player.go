@@ -19,6 +19,8 @@ type Player struct {
 
 	Damage int32
 
+	Inventory map[Item]int32
+
 	PlayerTimestamp time.Time
 
 	image     *ebiten.Image
@@ -126,7 +128,7 @@ func (p *Player) TouchingEntity(g *Game) (Entity, bool) {
 			return e, true
 		}
 	}
-	return Entity{-1, -1, "", nil, false, -1}, false
+	return Entity{-1, -1, "", nil, false, -1, false}, false
 }
 
 func (p *Player) Rotate(angle float64) {

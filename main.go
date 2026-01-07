@@ -201,6 +201,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// Entities
 	for i := 0; i < len(g.E); i++ {
+		if g.E[i].IsDead(g.P) {
+			continue
+		}
 		g.DrawEntity(screen, g.E[i])
 	}
 
@@ -241,6 +244,7 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 		MouseX:         0,
 		MouseY:         0,
 		Damage:         10,
+		Inventory:      make(map[Item]int32),
 		image:          img,
 		zoneImage:      zoneImg,
 	}
@@ -255,9 +259,9 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 	for i := 0; i < NumEnts; i++ {
 		randomPick := rand.Intn(100)
 		if randomPick >= 50 {
-			e[i] = Entity{pts[i].X, pts[i].Y, "Rock", re, false, 80}
+			e[i] = Entity{pts[i].X, pts[i].Y, "Rock", re, false, 80, true}
 		} else {
-			e[i] = Entity{pts[i].X, pts[i].Y, "Bush", be, false, 40}
+			e[i] = Entity{pts[i].X, pts[i].Y, "Bush", be, false, 40, true}
 		}
 	}
 
