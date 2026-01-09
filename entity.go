@@ -33,11 +33,11 @@ func (e *Entity) Interact(p *Player, isAttacking bool) {
 func (e *Entity) DropLoot(p *Player) {
 	switch e.Type {
 	case "Rock":
-		stone := Item{"Stone"}
-		p.Inventory[stone] += 1
+		// stone := Item{"Stone"}
+		p.Inventory["Stone"] += 1
 	case "Bush":
-		stick := Item{"Stick"}
-		p.Inventory[stick] += 1
+		// stick := Item{"Stick"}
+		p.Inventory["Stick"] += 1
 	}
 }
 

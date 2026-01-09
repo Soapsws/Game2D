@@ -220,6 +220,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.P.MouseY,
 	)
 	ebitenutil.DebugPrintAt(screen, debug, 10, 10)
+
+	// Drawing inventory
+	g.P.CommandFactory(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -244,12 +247,13 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 		MouseX:         0,
 		MouseY:         0,
 		Damage:         10,
-		Inventory:      make(map[Item]int32),
+		Inventory:      make(map[string]int),
 		image:          img,
 		zoneImage:      zoneImg,
 	}
 
 	p.TimeInit()
+	p.InventoryInit()
 
 	NumEnts := 100
 	e := make([]Entity, NumEnts)

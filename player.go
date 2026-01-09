@@ -2,9 +2,11 @@ package main
 
 import (
 	"math"
+	"strconv"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type Player struct {
@@ -19,12 +21,36 @@ type Player struct {
 
 	Damage int32
 
-	Inventory map[Item]int32
+	Inventory           map[string]int
+	InventoryVisualizer []string
 
 	PlayerTimestamp time.Time
 
 	image     *ebiten.Image
 	zoneImage *ebiten.Image
+}
+
+func (p *Player) CommandFactory(screen *ebiten.Image) {
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		p.CheckInventory(screen, 1)
+	}
+}
+
+func (p *Player) InventoryInit() {
+	p.InventoryVisualizer = make([]string, 0)
+	p.InventoryVisualizer = append(p.InventoryVisualizer, "Stone")
+	p.InventoryVisualizer = append(p.InventoryVisualizer, "Stick")
+}
+
+func (p *Player) CheckInventory(screen *ebiten.Image, page int) {
+	s := ""
+	for i := page - 1; i < page+7; i++ {
+		if i >= len(p.InventoryVisualizer) {
+			break
+		}
+		s += p.InventoryVisualizer[i] + " " + strconv.Itoa(p.Inventory[p.InventoryVisualizer[i]]) + "\n"
+	}
+	ebitenutil.DebugPrintAt(screen, s, ScreenWidth/2, ScreenHeight/2)
 }
 
 func (p *Player) TimeInit() {
