@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type Player struct {
@@ -30,9 +29,15 @@ type Player struct {
 	zoneImage *ebiten.Image
 }
 
-func (p *Player) CommandFactory(screen *ebiten.Image) {
+func (p *Player) UpdateRenderer(g *Game) {
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		p.CheckInventory(screen, 1)
+		g.R.DisplayingInventory = true
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		g.R.DisplayingZone = true
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		g.R.DisplayingCrafting = true
 	}
 }
 
@@ -42,7 +47,7 @@ func (p *Player) InventoryInit() {
 	p.InventoryVisualizer = append(p.InventoryVisualizer, "Stick")
 }
 
-func (p *Player) CheckInventory(screen *ebiten.Image, page int) {
+func (p *Player) CheckInventory(page int) string {
 	s := ""
 	for i := page - 1; i < page+7; i++ {
 		if i >= len(p.InventoryVisualizer) {
@@ -50,7 +55,7 @@ func (p *Player) CheckInventory(screen *ebiten.Image, page int) {
 		}
 		s += p.InventoryVisualizer[i] + " " + strconv.Itoa(p.Inventory[p.InventoryVisualizer[i]]) + "\n"
 	}
-	ebitenutil.DebugPrintAt(screen, s, ScreenWidth/2, ScreenHeight/2)
+	return s
 }
 
 func (p *Player) TimeInit() {
@@ -106,8 +111,6 @@ func (p *Player) Move(xDir, yDir float64, g *Game) error {
 }
 
 func (p *Player) CheckInteractableZone(g *Game) {
-	p.DisplayingZone = ebiten.IsKeyPressed(ebiten.KeyShift)
-
 	// Using slice references to access pointer
 	for i := range g.E {
 		g.E[i].Interactable = false

@@ -16,6 +16,7 @@ type Game struct {
 	P *Player
 	E []Entity
 	T *Terrain
+	R *Renderer
 }
 
 var WorldMap = [][]int{
@@ -101,37 +102,36 @@ func (g *Game) DrawTile(screen *ebiten.Image, tile *ebiten.Image, tileX, tileY i
 	screen.DrawImage(tile, &op)
 }
 
-func (g *Game) DrawPlayer(screen *ebiten.Image, player *ebiten.Image, zone *ebiten.Image) {
-	op := ebiten.DrawImageOptions{}
+func (g *Game) DrawZone(screen *ebiten.Image, zone *ebiten.Image) {
 	oz := ebiten.DrawImageOptions{}
+	boundsz := float64(zone.Bounds().Dx())
+	scalez := float64(ZoneWorldSize / boundsz)
+	wz := zone.Bounds().Dx()
+	hz := zone.Bounds().Dy()
+
+	oz.GeoM.Translate(-float64(wz)/2, -float64(hz)/2)
+	oz.GeoM.Scale(scalez, scalez)
+
+	oz.GeoM.Translate(float64(ScreenWidth)/2, float64(ScreenHeight)/2)
+	screen.DrawImage(g.P.zoneImage, &oz)
+}
+
+func (g *Game) DrawPlayer(screen *ebiten.Image, player *ebiten.Image) {
+	op := ebiten.DrawImageOptions{}
 
 	bounds := float64(player.Bounds().Dx())
 	scale := float64(PlayerWorldSize) / bounds
 	w := player.Bounds().Dx()
 	h := player.Bounds().Dy()
 
-	boundsz := float64(zone.Bounds().Dx())
-	scalez := float64(ZoneWorldSize / boundsz)
-	wz := zone.Bounds().Dx()
-	hz := zone.Bounds().Dy()
-
 	// Place-specific pipeline: centering before scaling
 	op.GeoM.Translate(-float64(w)/2, -float64(h)/2) // Centers the sprite - super important!
 	op.GeoM.Scale(scale, scale)
 
-	oz.GeoM.Translate(-float64(wz)/2, -float64(hz)/2)
-	oz.GeoM.Scale(scalez, scalez)
-
 	op.GeoM.Rotate(g.P.Heading)
 	op.GeoM.Translate(float64(ScreenWidth)/2, float64(ScreenHeight)/2)
 
-	oz.GeoM.Translate(float64(ScreenWidth)/2, float64(ScreenHeight)/2)
-
 	screen.DrawImage(g.P.image, &op)
-
-	if g.P.DisplayingZone {
-		screen.DrawImage(g.P.zoneImage, &oz)
-	}
 }
 
 func (g *Game) PlayerMovement() {
@@ -175,6 +175,9 @@ func (g *Game) Update() error {
 	g.PlayerMovement()
 	g.PlayerHeading()
 	g.P.UpdateMousePos()
+
+	g.P.UpdateRenderer(g)
+
 	g.P.CheckInteractableZone(g)
 	if g.P.InteractCooldown() {
 		g.P.ScanInteractable(g)
@@ -208,7 +211,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// Player + Interactable Zone
-	g.DrawPlayer(screen, g.P.image, g.P.zoneImage)
+	g.DrawPlayer(screen, g.P.image)
 
 	debug := fmt.Sprintf(
 		"Player X: %.1f | Player Y: %.1f \nTile[%d,%d]\nMouse X: %.1f | Mouse Y: %.1f",
@@ -221,20 +224,30 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	)
 	ebitenutil.DebugPrintAt(screen, debug, 10, 10)
 
-	// Drawing inventory
-	g.P.CommandFactory(screen)
+	if g.R.DisplayingZone {
+		g.DrawZone(screen, g.P.zoneImage)
+		g.R.DisplayingZone = false
+	}
+	if g.R.DisplayingInventory {
+		s := g.P.CheckInventory(1)
+		ebitenutil.DebugPrintAt(screen, s, ScreenWidth/2, ScreenHeight/2)
+		g.R.DisplayingInventory = false
+	}
+	if g.R.DisplayingCrafting {
+		g.R.DisplayingCrafting = false
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return ScreenWidth, ScreenHeight
 }
 
-func Init() (*Player, *[]Entity, *Terrain, error) {
+func Init() (*Player, *[]Entity, *Terrain, *Renderer, error) {
 	img, _, err := ebitenutil.NewImageFromFile("images/Char_Game.png")
 	zoneImg, _, err := ebitenutil.NewImageFromFile("images/InteractableZone.png")
 
 	if err != nil {
-		return nil, nil, nil, errors.New("Bad image")
+		return nil, nil, nil, nil, errors.New("Bad image")
 	}
 
 	p := Player{
@@ -282,13 +295,19 @@ func Init() (*Player, *[]Entity, *Terrain, error) {
 		MapY: 0,
 	}
 
-	return &p, &e, &t, nil
+	r := Renderer{
+		DisplayingZone:      false,
+		DisplayingCrafting:  false,
+		DisplayingInventory: false,
+	}
+
+	return &p, &e, &t, &r, nil
 }
 
 func main() {
 	ebiten.SetWindowSize(WindowX, WindowY)
 	ebiten.SetWindowTitle("2D Game")
-	player, entities, terrain, err := Init()
+	player, entities, terrain, renderer, err := Init()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -297,6 +316,7 @@ func main() {
 		player,
 		*entities,
 		terrain,
+		renderer,
 	}
 
 	Tiles = InitTiles(WorldMap) // Slices are passed by value in GO
