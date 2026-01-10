@@ -176,7 +176,7 @@ func (g *Game) Update() error {
 	g.PlayerHeading()
 	g.P.UpdateMousePos()
 
-	g.P.UpdateRenderer(g)
+	UpdateRenderer(g)
 
 	g.P.CheckInteractableZone(g)
 	if g.P.InteractCooldown() {
@@ -227,13 +227,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.R.DisplayingZone {
 		g.DrawZone(screen, g.P.zoneImage)
 		g.R.DisplayingZone = false
-	}
-	if g.R.DisplayingInventory {
+	} else if g.R.DisplayingInventory {
 		s := g.P.CheckInventory(1)
 		ebitenutil.DebugPrintAt(screen, s, ScreenWidth/2, ScreenHeight/2)
 		g.R.DisplayingInventory = false
-	}
-	if g.R.DisplayingCrafting {
+	} else if g.R.DisplayingCrafting {
+		s := g.P.CheckCrafting(1)
+		ebitenutil.DebugPrintAt(screen, s, ScreenWidth/2, ScreenHeight/2)
 		g.R.DisplayingCrafting = false
 	}
 }
@@ -267,6 +267,7 @@ func Init() (*Player, *[]Entity, *Terrain, *Renderer, error) {
 
 	p.TimeInit()
 	p.InventoryInit()
+	p.CraftingInit()
 
 	NumEnts := 100
 	e := make([]Entity, NumEnts)

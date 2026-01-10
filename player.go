@@ -22,6 +22,7 @@ type Player struct {
 
 	Inventory           map[string]int
 	InventoryVisualizer []string
+	Crafting            CraftingBook
 
 	PlayerTimestamp time.Time
 
@@ -29,22 +30,29 @@ type Player struct {
 	zoneImage *ebiten.Image
 }
 
-func (p *Player) UpdateRenderer(g *Game) {
-	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		g.R.DisplayingInventory = true
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyShift) {
-		g.R.DisplayingZone = true
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyQ) {
-		g.R.DisplayingCrafting = true
-	}
-}
-
 func (p *Player) InventoryInit() {
 	p.InventoryVisualizer = make([]string, 0)
 	p.InventoryVisualizer = append(p.InventoryVisualizer, "Stone")
 	p.InventoryVisualizer = append(p.InventoryVisualizer, "Stick")
+}
+
+func (p *Player) CraftingInit() {
+	p.Crafting = CraftingBook{make([]Recipe, 0)}
+	p.Crafting.InitCB()
+}
+
+func (p *Player) CheckCrafting(page int) string {
+	s := ""
+	for i := page - 1; i < page+3; i++ {
+		if i >= len(p.Crafting.Recipes) {
+			break
+		}
+		s += ">" + p.Crafting.Recipes[i].Name + ":\n"
+		for name, cnt := range p.Crafting.Recipes[i].Materials {
+			s += name + " | " + strconv.Itoa(cnt) + "\n"
+		}
+	}
+	return s
 }
 
 func (p *Player) CheckInventory(page int) string {
