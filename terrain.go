@@ -10,6 +10,8 @@ type Terrain struct {
 	Stone *ebiten.Image
 	Water *ebiten.Image
 
+	Tiles [][]Tile
+
 	MapX float64
 	MapY float64
 }
@@ -20,8 +22,6 @@ type Tile struct {
 
 	Type string
 }
-
-var Tiles [][]Tile
 
 func InitTiles(M [][]int) [][]Tile {
 	T := make([][]Tile, len(M))

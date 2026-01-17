@@ -76,7 +76,7 @@ func (p *Player) InteractCooldown() bool {
 
 func (p *Player) Move(xDir, yDir float64, g *Game) error {
 	var speed float64
-	if TilePosition(p).Type == "Water" {
+	if TileRelativeToPosition(g.T, p.X, p.Y).Type == "Water" {
 		speed = float64(p.Speed) * (0.7)
 	} else {
 		speed = p.Speed
@@ -90,7 +90,7 @@ func (p *Player) Move(xDir, yDir float64, g *Game) error {
 	p.X = math.Max(-1*WorldWidth/2, math.Min(WorldWidth/2-1, p.X))
 	p.Y = math.Max(-1*WorldHeight/2, math.Min(p.Y, WorldHeight/2-1))
 
-	if TilePosition(p).Type == "Stone" {
+	if TileRelativeToPosition(g.T, p.X, p.Y).Type == "Stone" {
 		p.X -= speed * xDir
 		p.Y -= speed * yDir
 	} else {

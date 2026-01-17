@@ -1,7 +1,10 @@
 package main
 
 import (
+	"math/rand"
+
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type Entity struct {
@@ -11,6 +14,22 @@ type Entity struct {
 	Interactable bool
 	Health       int32
 	Alive        bool
+}
+
+func InitEntities(t *Terrain, numEnts int) []Entity {
+	e := make([]Entity, numEnts)
+	pts := RandomCoordGenerator(t, numEnts, true) // how many entities?
+	re, _, _ := ebitenutil.NewImageFromFile("images/RockEntityTransparent.png")
+	be, _, _ := ebitenutil.NewImageFromFile("images/BushEntityTransparent.png")
+	for i := 0; i < numEnts; i++ {
+		randomPick := rand.Intn(100)
+		if randomPick >= 50 {
+			e[i] = Entity{pts[i].X, pts[i].Y, "Rock", re, false, 80, true}
+		} else {
+			e[i] = Entity{pts[i].X, pts[i].Y, "Bush", be, false, 40, true}
+		}
+	}
+	return e
 }
 
 // Possible non-moving entities: rocks, trees/bushes

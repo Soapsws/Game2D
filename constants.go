@@ -30,8 +30,8 @@ const (
 	MapWidthTiles  = 16
 	MapHeightTiles = 16
 
-	WorldWidth  = MapWidthTiles * TileSize * TileScale
-	WorldHeight = MapHeightTiles * TileSize * TileScale
+	WorldWidth  = MapWidthTiles * TileWorldSize
+	WorldHeight = MapHeightTiles * TileWorldSize
 
 	HalfW = float64(ScreenWidth) / 2
 	HalfH = float64(ScreenHeight) / 2

@@ -5,14 +5,13 @@ import (
 	"math/rand"
 )
 
-func TilePosition(p *Player) Tile {
+func TileRelativeToPosition(t *Terrain, x, y float64) Tile {
 	// Tiles: 256 x 256
-	x := p.X
-	y := p.Y
+
 	adjustedX := int(math.Floor((x + WorldWidth/2) / TileWorldSize))
 	adjustedY := int(math.Floor((y + WorldHeight/2) / TileWorldSize))
 
-	return Tiles[adjustedY][adjustedX]
+	return t.Tiles[adjustedY][adjustedX]
 }
 
 type Point struct {
@@ -20,20 +19,26 @@ type Point struct {
 	Y float64
 }
 
-func RandomCoordGenerator(n int) []Point {
+func RandomCoordGenerator(t *Terrain, n int, banTileSpawn bool) []Point {
 	coords := make([]Point, n)
 	i := 0
 	for i < n {
 		x := rand.Intn(4096) - 2048
 		y := rand.Intn(4096) - 2048
 		bc := 0
+		banc := false
 		if x < 100 && x > -100 {
 			bc += 1
 		}
 		if y < 100 && y > -100 {
 			bc += 1
 		}
-		if bc < 2 {
+		t := TileRelativeToPosition(t, float64(x), float64(y))
+		if t.Type == "Stone" {
+			banc = true
+		}
+
+		if bc < 2 && !banc {
 			coords[i] = Point{float64(x), float64(y)}
 			i++
 		}

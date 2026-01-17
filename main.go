@@ -9,7 +9,6 @@ import (
 
 	"errors"
 	"math"
-	"math/rand"
 )
 
 type Game struct {
@@ -217,8 +216,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		"Player X: %.1f | Player Y: %.1f \nTile[%d,%d]\nMouse X: %.1f | Mouse Y: %.1f",
 		g.P.X,
 		g.P.Y,
-		TilePosition(g.P).IDX,
-		TilePosition(g.P).IDY,
+		TileRelativeToPosition(g.T, g.P.X, g.P.Y).IDX,
+		TileRelativeToPosition(g.T, g.P.X, g.P.Y).IDY,
 		g.P.MouseX,
 		g.P.MouseY,
 	)
@@ -269,20 +268,6 @@ func Init() (*Player, *[]Entity, *Terrain, *Renderer, error) {
 	p.InventoryInit()
 	p.CraftingInit()
 
-	NumEnts := 100
-	e := make([]Entity, NumEnts)
-	pts := RandomCoordGenerator(NumEnts) // how many entities?
-	re, _, err := ebitenutil.NewImageFromFile("images/RockEntityTransparent.png")
-	be, _, err := ebitenutil.NewImageFromFile("images/BushEntityTransparent.png")
-	for i := 0; i < NumEnts; i++ {
-		randomPick := rand.Intn(100)
-		if randomPick >= 50 {
-			e[i] = Entity{pts[i].X, pts[i].Y, "Rock", re, false, 80, true}
-		} else {
-			e[i] = Entity{pts[i].X, pts[i].Y, "Bush", be, false, 40, true}
-		}
-	}
-
 	gt, _, err := ebitenutil.NewImageFromFile("images/GrassTile.png")
 	st, _, err := ebitenutil.NewImageFromFile("images/StoneTile.png")
 	wt, _, err := ebitenutil.NewImageFromFile("images/WaterTile.png")
@@ -292,9 +277,14 @@ func Init() (*Player, *[]Entity, *Terrain, *Renderer, error) {
 		Stone: st,
 		Water: wt,
 
+		Tiles: InitTiles(WorldMap),
+
 		MapX: 0,
 		MapY: 0,
 	}
+
+	NumEnts := 100
+	e := InitEntities(&t, NumEnts)
 
 	r := Renderer{
 		DisplayingZone:      false,
@@ -319,8 +309,6 @@ func main() {
 		terrain,
 		renderer,
 	}
-
-	Tiles = InitTiles(WorldMap)
 
 	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)
