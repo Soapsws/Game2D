@@ -320,7 +320,7 @@ func main() {
 		renderer,
 	}
 
-	Tiles = InitTiles(WorldMap) // Slices are passed by value in GO
+	Tiles = InitTiles(WorldMap)
 
 	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)

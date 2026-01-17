@@ -159,6 +159,9 @@ func (p *Player) ScanInteractable(g *Game) {
 
 func (p *Player) TouchingEntity(g *Game) (Entity, bool) {
 	for _, e := range g.E {
+		if !e.Alive {
+			continue
+		}
 		b := CollisionDetectorCircle(p.X, p.Y, e.X, e.Y,
 			float64(PlayerWorldSize)/2, EntityWorldSize/2)
 		if b {
